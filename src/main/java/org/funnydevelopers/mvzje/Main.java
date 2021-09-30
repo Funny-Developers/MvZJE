@@ -1,4 +1,4 @@
-package org.example;
+package org.funnydevelopers.mvzje;
 
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.opengl.GL;

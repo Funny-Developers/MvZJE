@@ -3,10 +3,10 @@ plugins {
     id 'idea'
 }
 
-sourceCompatibility = targetCompatibility = JavaVersion.VERSION_11
+sourceCompatibility = targetCompatibility = JavaVersion.VERSION_17
 
-group 'io.github.username'
-archivesBaseName = 'project-name'
+group 'org.funnydevelopers'
+archivesBaseName = 'mvzje'
 version '0.1.0-SNAPSHOT'
 
 repositories {
@@ -20,7 +20,6 @@ dependencies {
     runtimeOnly 'org.lwjgl:lwjgl::natives-windows'
     runtimeOnly 'org.lwjgl:lwjgl-glfw::natives-windows'
     runtimeOnly 'org.lwjgl:lwjgl-opengl::natives-windows'
-    runtimeOnly 'org.lwjgl:lwjgl-stb::natives-windows'
 }
 
 tasks.withType(JavaCompile) {
@@ -30,12 +29,12 @@ tasks.withType(JavaCompile) {
 jar {
     from 'LICENSE'
     manifest {
-        attributes 'Main-Class': 'org.example.Main',
+        attributes 'Main-Class': 'org.funnydevelopers.mvzje.Main',
                 'Specification-Title': archiveBaseName,
-                'Specification-Vendor': 'username',
+                'Specification-Vendor': 'Funny Developers',
                 'Specification-Version': '0',
-                'Implementation-Title': 'Name',
-                'Implementation-Vendor': 'username',
+                'Implementation-Title': 'MvZ JE',
+                'Implementation-Vendor': 'Funny Developers',
                 'Implementation-Version': archiveVersion
     }
 }
