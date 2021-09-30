@@ -1,4 +1,3 @@
 # MvZJE
-Minecraft vs. Zombies: Java Edition with LWJGL
 
-Use Java 17
+Minecraft vs. Zombies: Java Edition with LWJGL3 and Java 17
