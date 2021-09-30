@@ -1,0 +1,52 @@
+plugins {
+    id 'java'
+    id 'idea'
+}
+
+sourceCompatibility = targetCompatibility = JavaVersion.VERSION_17
+
+group 'org.funnydevelopers'
+archivesBaseName = 'mvzje'
+version '0.1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+    // temporary maven repository
+    maven { url 'https://s01.oss.sonatype.org/content/repositories/releases' }
+}
+
+dependencies {
+    implementation 'io.github.over-run:glutils:1.2.0'
+    runtimeOnly 'org.lwjgl:lwjgl::natives-windows'
+    runtimeOnly 'org.lwjgl:lwjgl-glfw::natives-windows'
+    runtimeOnly 'org.lwjgl:lwjgl-opengl::natives-windows'
+}
+
+tasks.withType(JavaCompile) {
+    options.encoding 'UTF-8'
+}
+
+jar {
+    from 'LICENSE'
+    manifest {
+        attributes 'Main-Class': 'org.funnydevelopers.mvzje.Main',
+                'Specification-Title': archiveBaseName,
+                'Specification-Vendor': 'Funny Developers',
+                'Specification-Version': '0',
+                'Implementation-Title': 'MvZ JE',
+                'Implementation-Vendor': 'Funny Developers',
+                'Implementation-Version': archiveVersion
+    }
+}
+
+task sourcesJar(type: Jar, dependsOn: classes) {
+    archiveClassifier.set 'sources'
+    from sourceSets.main.allSource, 'LICENSE'
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    archiveClassifier.set 'javadoc'
+    from javadoc, 'LICENSE'
+}
+
+idea.module.inheritOutputDirs = true
