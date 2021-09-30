@@ -1,0 +1,53 @@
+plugins {
+    id 'java'
+    id 'idea'
+}
+
+sourceCompatibility = targetCompatibility = JavaVersion.VERSION_11
+
+group 'io.github.username'
+archivesBaseName = 'project-name'
+version '0.1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+    // temporary maven repository
+    maven { url 'https://s01.oss.sonatype.org/content/repositories/releases' }
+}
+
+dependencies {
+    implementation 'io.github.over-run:glutils:1.2.0'
+    runtimeOnly 'org.lwjgl:lwjgl::natives-windows'
+    runtimeOnly 'org.lwjgl:lwjgl-glfw::natives-windows'
+    runtimeOnly 'org.lwjgl:lwjgl-opengl::natives-windows'
+    runtimeOnly 'org.lwjgl:lwjgl-stb::natives-windows'
+}
+
+tasks.withType(JavaCompile) {
+    options.encoding 'UTF-8'
+}
+
+jar {
+    from 'LICENSE'
+    manifest {
+        attributes 'Main-Class': 'org.example.Main',
+                'Specification-Title': archiveBaseName,
+                'Specification-Vendor': 'username',
+                'Specification-Version': '0',
+                'Implementation-Title': 'Name',
+                'Implementation-Vendor': 'username',
+                'Implementation-Version': archiveVersion
+    }
+}
+
+task sourcesJar(type: Jar, dependsOn: classes) {
+    archiveClassifier.set 'sources'
+    from sourceSets.main.allSource, 'LICENSE'
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    archiveClassifier.set 'javadoc'
+    from javadoc, 'LICENSE'
+}
+
+idea.module.inheritOutputDirs = true
