@@ -3,7 +3,7 @@ plugins {
     id 'idea'
 }
 
-sourceCompatibility = targetCompatibility = JavaVersion.VERSION_17
+sourceCompatibility = targetCompatibility = JavaVersion.VERSION_16
 
 group 'org.funnydevelopers'
 archivesBaseName = 'mvzje'

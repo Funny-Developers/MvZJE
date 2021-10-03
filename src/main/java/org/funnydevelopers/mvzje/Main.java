@@ -28,7 +28,7 @@ public class Main implements Runnable, AutoCloseable {
     public void start() {
         GLFWErrorCallback.createPrint().set();
         glfwInit();
-        window = new GLFWindow(800, 600, "lwjgl-basic");
+        window = new GLFWindow(800, 600, "Minecraft vs Zombies: Java Edition");
         window.keyCb((hWnd, key, scancode, action, mods) -> {
             if (action == GLFW_PRESS) {
                 if (key == GLFW_KEY_ESCAPE) {
@@ -36,7 +36,7 @@ public class Main implements Runnable, AutoCloseable {
                 }
             }
         });
-        framebuffer = new Framebuffer();
+        Framebuffer framebuffer = new Framebuffer();
         framebuffer.cb = (hWnd, width, height) -> resize(width, height);
         framebuffer.init(window);
         window.makeCurr();
