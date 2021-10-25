@@ -1,10 +1,12 @@
 package org.funnydevelopers.mvzje.client.screen;
 
 /**
- * @author crazy-piggy
+ * @author crazy-piggy, squid233
  * @since 0.1.0
  */
-public class MainScreen {
-    //主界面
-    //毕竟不能写到Main.java里面
+public class MainScreen extends Screen {
+    @Override
+    public void render(double delta) {
+        super.render(delta);
+    }
 }

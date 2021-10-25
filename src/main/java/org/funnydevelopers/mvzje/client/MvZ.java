@@ -1,10 +1,12 @@
 package org.funnydevelopers.mvzje.client;
 
+import org.funnydevelopers.mvzje.client.render.TextRenderer;
 import org.funnydevelopers.mvzje.client.screen.EnterAnimationScreen;
 import org.funnydevelopers.mvzje.client.screen.Screen;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.glfw.GLFWVidMode;
 import org.lwjgl.opengl.GL;
+import org.overrun.glutils.Textures;
 import org.overrun.glutils.wnd.Framebuffer;
 import org.overrun.glutils.wnd.GLFWindow;
 
@@ -12,7 +14,7 @@ import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
 
 /**
- * @author squid233
+ * @author crazy-piggy, squid233
  * @since 0.1.0
  */
 public enum MvZ implements AutoCloseable {
@@ -27,7 +29,7 @@ public enum MvZ implements AutoCloseable {
         glViewport(0, 0, w, h);
         glMatrixMode(GL_PROJECTION);
         glLoadIdentity();
-        glOrtho(0, w, h, 0, -1, 1);
+        glOrtho(0, w, 0, h, -100, 100);
         glMatrixMode(GL_MODELVIEW);
     }
 
@@ -42,7 +44,8 @@ public enum MvZ implements AutoCloseable {
         GLFWErrorCallback.createPrint().set();
         glfwInit();
         glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
-        window = new GLFWindow(800, 600, "Minecraft vs Zombies: Java Edition");
+        window = new GLFWindow(800, 600, "Minecraft vs. Zombies: Java Edition");
+
         window.keyCb((hWnd, key, scancode, action, mods) -> {
             if (action == GLFW_PRESS) {
                 if (key == GLFW_KEY_ESCAPE) {
@@ -50,16 +53,37 @@ public enum MvZ implements AutoCloseable {
                 }
             }
         });
+        window.cursorPosCb((hWnd, x, y) -> {
+            window.mouseX = (int) x;
+            window.mouseY = (int) y;
+        });
+        glfwSetMouseButtonCallback(window.hWnd, (hWnd, button, action, mods) -> {
+            if (action == GLFW_PRESS) {
+                if (screen != null) {
+                    screen.mousePress(window.mouseX, window.mouseY, button);
+                }
+            }
+        });
+
         GLFWVidMode vidMode = glfwGetVideoMode(glfwGetPrimaryMonitor());
         if (vidMode != null) {
             window.setPos((vidMode.width() - 800) / 2, (vidMode.height() - 600) / 2);
         }
+
         framebuffer = new Framebuffer();
         framebuffer.cb = (hWnd, width, height) -> resize(width, height);
         framebuffer.init(window);
+
         window.makeCurr();
         GL.createCapabilities();
+
         glClearColor(0, 0, 0, 1);
+        glEnable(GL_TEXTURE_2D);
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+        TextRenderer.init();
+
         resize(800, 600);
         glfwSwapInterval(1);
         timer.advanceTime();
@@ -98,6 +122,7 @@ public enum MvZ implements AutoCloseable {
 
     @Override
     public void close() {
+        Textures.close();
         window.free();
         glfwTerminate();
         glfwSetErrorCallback(null).free();
