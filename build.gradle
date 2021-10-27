@@ -13,10 +13,11 @@ repositories {
     mavenCentral()
     // temporary maven repository
     maven { url 'https://s01.oss.sonatype.org/content/repositories/releases' }
+    maven { url 'https://s01.oss.sonatype.org/content/repositories/snapshots' }
 }
 
 dependencies {
-    implementation 'io.github.over-run:glutils:1.3.0'
+    implementation 'io.github.over-run:glutils:1.4.0-SNAPSHOT'
     compileOnly 'org.jetbrains:annotations:22.0.0'
     runtimeOnly 'org.lwjgl:lwjgl::natives-windows'
     runtimeOnly 'org.lwjgl:lwjgl-glfw::natives-windows'

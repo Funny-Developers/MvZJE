@@ -1,7 +1,7 @@
 package org.funnydevelopers.mvzje.client;
 
 import org.funnydevelopers.mvzje.client.render.TextRenderer;
-import org.funnydevelopers.mvzje.client.screen.EnterAnimationScreen;
+import org.funnydevelopers.mvzje.client.screen.LoadingScreen;
 import org.funnydevelopers.mvzje.client.screen.Screen;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.glfw.GLFWVidMode;
@@ -20,6 +20,7 @@ import static org.lwjgl.opengl.GL11.*;
 public enum MvZ implements AutoCloseable {
     INSTANCE;
 
+    public static final String VERSION = "0.1.0";
     public GLFWindow window;
     public Framebuffer framebuffer;
     public Screen screen;
@@ -44,6 +45,7 @@ public enum MvZ implements AutoCloseable {
         GLFWErrorCallback.createPrint().set();
         glfwInit();
         glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
+        glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
         window = new GLFWindow(800, 600, "Minecraft vs. Zombies: Java Edition");
 
         window.keyCb((hWnd, key, scancode, action, mods) -> {
@@ -92,7 +94,7 @@ public enum MvZ implements AutoCloseable {
 
     public void run() {
         double lastTime = glfwGetTime() * 1000;
-        openScreen(new EnterAnimationScreen());
+        openScreen(new LoadingScreen());
         while (!window.shouldClose()) {
             timer.advanceTime();
             for (int i = 0; i < timer.ticks; i++) {

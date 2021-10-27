@@ -1,5 +1,9 @@
 package org.funnydevelopers.mvzje.client;
 
+import org.lwjgl.system.MemoryStack;
+
+import java.io.IOException;
+
 import static org.lwjgl.opengl.GL11.GL_NEAREST;
 
 /**
@@ -12,13 +16,18 @@ public class Textures
         Textures.class.getClassLoader();
     public static final int TEXTURE_PROGRESS_BAR = load(cl, "progress_bar.png");
     public static final int TEXTURE_DAISY = load(cl, "daisy.png");
+    public static final int TEXTURE_LOADING_BG = load(cl, "loading_bg.png");
 
     public static int load(ClassLoader loader,
                            String filename)
         throws RuntimeException {
-        try {
-            return loadAWT(loader, filename, GL_NEAREST);
-        } catch (Exception e) {
+        try (var stack = MemoryStack.stackPush();
+             var is = loader.getResourceAsStream(filename)) {
+            assert is != null;
+            var bytes = is.readAllBytes();
+            var bb = stack.malloc(bytes.length);
+            return load(filename, bb.put(bytes).flip(), GL_NEAREST);
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
