@@ -32,7 +32,7 @@ tasks.withType(JavaCompile) {
 jar {
     from 'LICENSE'
     manifest {
-        attributes 'Main-Class': 'org.funnydevelopers.mvzje.Main',
+        attributes 'Main-Class': 'org.funnydevelopers.mvzje.client.main.Main',
                 'Specification-Title': archiveBaseName,
                 'Specification-Vendor': 'Funny Developers',
                 'Specification-Version': '0',
