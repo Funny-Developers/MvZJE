@@ -1,5 +1,6 @@
 package org.funnydevelopers.mvzje.client;
 
+import java.util.Locale;
 import java.util.ResourceBundle;
 
 /**
@@ -8,9 +9,9 @@ import java.util.ResourceBundle;
  */
 public class Language {
     private static final ResourceBundle BUNDLE =
-        ResourceBundle.getBundle("translat");
+        ResourceBundle.getBundle("translat", Locale.US);
 
     public static String translate(String key) {
-        return String.valueOf(BUNDLE.getObject(key));
+        return BUNDLE.getString(key);
     }
 }

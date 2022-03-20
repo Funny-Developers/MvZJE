@@ -3,10 +3,13 @@ package org.funnydevelopers.mvzje.client.screen;
 import org.funnydevelopers.mvzje.client.MvZ;
 import org.funnydevelopers.mvzje.client.render.TextRenderer;
 import org.funnydevelopers.mvzje.client.screen.widget.Button;
+import org.overrun.swgl.core.gl.GLDrawMode;
+import org.overrun.swgl.core.gui.font.SwglEasyFont;
 
 import static org.funnydevelopers.mvzje.client.Language.translate;
 import static org.funnydevelopers.mvzje.client.Textures.*;
-import static org.lwjgl.opengl.GL11.*;
+import static org.overrun.swgl.core.gl.GLStateMgr.bindTexture2D;
+import static org.overrun.swgl.core.gl.ims.GLImmeMode.*;
 
 /**
  * 开场动画,类似Minecraft启动时的Mojang Studio标志
@@ -17,13 +20,17 @@ import static org.lwjgl.opengl.GL11.*;
 public class LoadingScreen extends Screen {
     private int progress;
     private int daisy;
+    private boolean initialized;
 
     @Override
     public void init() {
         super.init();
-        progress = 0;
+        if (!initialized) {
+            progress = 0;
+            initialized = true;
+        }
         addButton(new Button(width / 2 - 128,
-            24 + 32,
+            height - (24 + 32),
             256,
             32,
             System.out::println) {
@@ -31,29 +38,34 @@ public class LoadingScreen extends Screen {
             public void render(double delta) {
                 super.render(delta);
                 String str;
-                float fy =
-                    y - (height + TextRenderer.getHeight()) / 2f;
                 if (progress < 100) {
                     str = translate("main.loading");
                 } else {
                     str = translate("main.start");
                 }
+                lglPushMatrix();
+                lglScale(2.0f);
                 TextRenderer.drawText(
-                    x + (width - TextRenderer.getWidth(str)) / 2f,
-                    fy,
+                    x + (width - SwglEasyFont.getWidth(str) * 2.0f) / 2f,
+                    y + (height - SwglEasyFont.getHeight(str) * 2.0f) / 2f,
                     str);
+                lglPopMatrix();
             }
 
             @Override
             public void hover(double delta) {
                 if (progress >= 100) {
-                    glColor4f(1, 1, 1, 0.5f);
-                    glBegin(GL_QUADS);
-                    glVertex3f(x, y, 0);
-                    glVertex3f(x, y - height, 0);
-                    glVertex3f(x + width, y - height, 0);
-                    glVertex3f(x + width, y, 0);
-                    glEnd();
+                    lglColor(1, 1, 1, 0.5f);
+                    lglBegin(GLDrawMode.QUADS);
+                    lglVertex(x, y, 0);
+                    lglEmit();
+                    lglVertex(x, y + height, 0);
+                    lglEmit();
+                    lglVertex(x + width, y + height, 0);
+                    lglEmit();
+                    lglVertex(x + width, y, 0);
+                    lglEmit();
+                    lglEnd();
                 }
             }
         });
@@ -79,76 +91,94 @@ public class LoadingScreen extends Screen {
 
     @Override
     public void render(double delta) {
-        glBindTexture(GL_TEXTURE_2D, TEXTURE_LOADING_BG);
-        glColor3f(1, 1, 1);
-        glBegin(GL_QUADS);
-        glTexCoord2f(0, 0);
-        glVertex3f(0, 600, 0);
-        glTexCoord2f(0, 1);
-        glVertex3f(0, 0, 0);
-        glTexCoord2f(1, 1);
-        glVertex3f(800, 0, 0);
-        glTexCoord2f(1, 0);
-        glVertex3f(800, 600, 0);
-        glEnd();
+        TEXTURE_LOADING_BG.bind();
+        lglColor(1, 1, 1);
+        lglSetTexCoordArrayState(true);
+        lglBegin(GLDrawMode.QUADS);
+        lglTexCoord(0, 0);
+        lglVertex(0, 0, 0);
+        lglEmit();
+        lglTexCoord(0, 1);
+        lglVertex(0, height, 0);
+        lglEmit();
+        lglTexCoord(1, 1);
+        lglVertex(width, height, 0);
+        lglEmit();
+        lglTexCoord(1, 0);
+        lglVertex(width, 0, 0);
+        lglEmit();
+        lglEnd();
 
-        glPushMatrix();
-        glTranslatef(width / 2f - 128, 24, 0);
-        glColor3f(1, 1, 1);
-        glBindTexture(GL_TEXTURE_2D, TEXTURE_PROGRESS_BAR);
+        lglPushMatrix();
+        lglTranslate(width / 2f - 128, height - 24, 0);
+        lglColor(1, 1, 1);
+        TEXTURE_PROGRESS_BAR.bind();
 
-        glBegin(GL_QUADS);
+        lglBegin(GLDrawMode.QUADS);
 
-        glTexCoord2f(0, 0.5f);
-        glVertex3f(0, 32, 0);
-        glTexCoord2f(0, 1);
-        glVertex3f(0, 0, 0);
-        glTexCoord2f(1, 1);
-        glVertex3f(256, 0, 0);
-        glTexCoord2f(1, 0.5f);
-        glVertex3f(256, 32, 0);
+        lglTexCoord(0, 0.5f);
+        lglVertex(0, -32, 0);
+        lglEmit();
+        lglTexCoord(0, 1);
+        lglVertex(0, 0, 0);
+        lglEmit();
+        lglTexCoord(8.0f, 1);
+        lglVertex(256, 0, 0);
+        lglEmit();
+        lglTexCoord(8.0f, 0.5f);
+        lglVertex(256, -32, 0);
+        lglEmit();
 
         float unmlProgress = progress * 2.56f;
-        float u = unmlProgress / 256.0f;
-        glTexCoord2f(0, 0);
-        glVertex3f(0, 32, 0);
-        glTexCoord2f(0, 0.5f);
-        glVertex3f(0, 0, 0);
-        glTexCoord2f(u, 0.5f);
-        glVertex3f(unmlProgress, 0, 0);
-        glTexCoord2f(u, 0);
-        glVertex3f(unmlProgress, 32, 0);
+        float u = unmlProgress / 32.0f;
+        lglTexCoord(0, 0);
+        lglVertex(0, -32, 0);
+        lglEmit();
+        lglTexCoord(0, 0.5f);
+        lglVertex(0, 0, 0);
+        lglEmit();
+        lglTexCoord(u, 0.5f);
+        lglVertex(unmlProgress, 0, 0);
+        lglEmit();
+        lglTexCoord(u, 0);
+        lglVertex(unmlProgress, -32, 0);
+        lglEmit();
 
-        glEnd();
+        lglEnd();
 
-        glBindTexture(GL_TEXTURE_2D, 0);
+        bindTexture2D(0);
 
         if (progress >= 100) {
-            glPushMatrix();
-            glTranslatef(256 - 16, 32, 0);
-            glBindTexture(GL_TEXTURE_2D, TEXTURE_DAISY);
-            var v = 1 - daisy / 16.0f;
-            glBegin(GL_QUADS);
-            glTexCoord2f(0, v);
-            glVertex3f(0, daisy, 0);
-            glTexCoord2f(0, 1);
-            glVertex3f(0, 0, 0);
-            glTexCoord2f(1, 1);
-            glVertex3f(16, 0, 0);
-            glTexCoord2f(1, v);
-            glVertex3f(16, daisy, 0);
-            glEnd();
-            glBindTexture(GL_TEXTURE_2D, 0);
-            glPopMatrix();
+            lglPushMatrix();
+            lglTranslate(256 - 16, -32, 0);
+            TEXTURE_DAISY.bind();
+            float v = 1.0f - daisy / 16.0f;
+            lglBegin(GLDrawMode.QUADS);
+            lglTexCoord(0, v);
+            lglVertex(0, -daisy, 0);
+            lglEmit();
+            lglTexCoord(0, 1);
+            lglVertex(0, 0, 0);
+            lglEmit();
+            lglTexCoord(1, 1);
+            lglVertex(16, 0, 0);
+            lglEmit();
+            lglTexCoord(1, v);
+            lglVertex(16, -daisy, 0);
+            lglEmit();
+            lglEnd();
+            bindTexture2D(0);
+            lglPopMatrix();
         }
+        lglSetTexCoordArrayState(false);
 
-        glPopMatrix();
+        lglPopMatrix();
 
-        glPushMatrix();
+        lglPushMatrix();
         var text = "v" + MvZ.VERSION;
-        glTranslatef(800 - TextRenderer.getWidth(text), 0, 0);
-        TextRenderer.drawText(0, 0, text);
-        glPopMatrix();
+        lglScale(2.0f);
+        TextRenderer.drawText(width - SwglEasyFont.getWidth(text) * 2.0f, height - SwglEasyFont.getHeight(text) * 2.0f, text);
+        lglPopMatrix();
 
         super.render(delta);
     }

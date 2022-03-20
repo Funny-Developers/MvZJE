@@ -3,7 +3,7 @@ plugins {
     id 'idea'
 }
 
-sourceCompatibility = targetCompatibility = JavaVersion.VERSION_16
+sourceCompatibility = targetCompatibility = JavaVersion.VERSION_17
 
 group 'org.funnydevelopers'
 archivesBaseName = 'mvzje'
@@ -17,10 +17,11 @@ repositories {
 }
 
 dependencies {
-    implementation 'io.github.over-run:glutils:1.4.0-SNAPSHOT'
-    compileOnly 'org.jetbrains:annotations:22.0.0'
+    implementation 'io.github.over-run:swgl-core:0.1.0'
+    compileOnly 'org.jetbrains:annotations:23.0.0'
     runtimeOnly 'org.lwjgl:lwjgl::natives-windows'
     runtimeOnly 'org.lwjgl:lwjgl-glfw::natives-windows'
+    runtimeOnly 'org.lwjgl:lwjgl-jemalloc::natives-windows'
     runtimeOnly 'org.lwjgl:lwjgl-opengl::natives-windows'
     runtimeOnly 'org.lwjgl:lwjgl-stb::natives-windows'
 }

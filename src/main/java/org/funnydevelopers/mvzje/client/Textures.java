@@ -1,34 +1,43 @@
 package org.funnydevelopers.mvzje.client;
 
-import org.lwjgl.system.MemoryStack;
+import org.overrun.swgl.core.asset.tex.ITextureParam;
+import org.overrun.swgl.core.asset.tex.Texture2D;
+import org.overrun.swgl.core.io.IFileProvider;
 
-import java.io.IOException;
-
-import static org.lwjgl.opengl.GL11.GL_NEAREST;
+import static org.lwjgl.opengl.GL13C.*;
 
 /**
  * @author squid233
  * @since 0.1.0
  */
-public class Textures
-    extends org.overrun.glutils.Textures {
-    private static final ClassLoader cl =
-        Textures.class.getClassLoader();
-    public static final int TEXTURE_PROGRESS_BAR = load(cl, "progress_bar.png");
-    public static final int TEXTURE_DAISY = load(cl, "daisy.png");
-    public static final int TEXTURE_LOADING_BG = load(cl, "loading_bg.png");
+public class Textures {
+    private static final IFileProvider FILE_PROVIDER = IFileProvider.ofCaller();
+    public static Texture2D TEXTURE_PROGRESS_BAR;
+    public static Texture2D TEXTURE_DAISY;
+    public static Texture2D TEXTURE_LOADING_BG;
 
-    public static int load(ClassLoader loader,
-                           String filename)
-        throws RuntimeException {
-        try (var stack = MemoryStack.stackPush();
-             var is = loader.getResourceAsStream(filename)) {
-            assert is != null;
-            var bytes = is.readAllBytes();
-            var bb = stack.malloc(bytes.length);
-            return load(filename, bb.put(bytes).flip(), GL_NEAREST);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+    public static void init() {
+        ITextureParam param = target -> {
+            glTexParameteri(target, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+            glTexParameteri(target, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        };
+        TEXTURE_PROGRESS_BAR = new Texture2D();
+        TEXTURE_PROGRESS_BAR.setParam(target -> {
+            param.set(target);
+            glTexParameteri(target, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        });
+        TEXTURE_PROGRESS_BAR.reload("progress_bar.png", FILE_PROVIDER);
+        TEXTURE_DAISY = new Texture2D();
+        TEXTURE_DAISY.setParam(param);
+        TEXTURE_DAISY.reload("daisy.png", FILE_PROVIDER);
+        TEXTURE_LOADING_BG = new Texture2D();
+        TEXTURE_LOADING_BG.setParam(param);
+        TEXTURE_LOADING_BG.reload("loading_bg.png", FILE_PROVIDER);
+    }
+
+    public static void close() {
+        TEXTURE_PROGRESS_BAR.close();
+        TEXTURE_DAISY.close();
+        TEXTURE_LOADING_BG.close();
     }
 }

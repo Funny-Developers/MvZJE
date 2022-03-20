@@ -48,8 +48,8 @@ public class Button implements Drawable, Widget {
                              int mouseY) {
         return mouseX >= x
             && mouseX < x + width
-            && mouseY >= y - height
-            && mouseY < y;
+            && mouseY >= y
+            && mouseY < y + height;
     }
 
     public void hover(double delta) {
@@ -57,8 +57,9 @@ public class Button implements Drawable, Widget {
 
     @Override
     public void render(double delta) {
-        var wnd = MvZ.INSTANCE.window;
-        isHovered = isHovered(wnd.mouseX,
-            wnd.getHeight() - wnd.mouseY);
+        var client = MvZ.getInstance();
+        var mouse = client.getMouse();
+        isHovered = isHovered(mouse.getIntLastX(),
+            mouse.getIntLastY());
     }
 }

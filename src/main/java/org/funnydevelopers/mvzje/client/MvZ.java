@@ -1,37 +1,52 @@
 package org.funnydevelopers.mvzje.client;
 
-import org.funnydevelopers.mvzje.client.render.TextRenderer;
 import org.funnydevelopers.mvzje.client.screen.LoadingScreen;
 import org.funnydevelopers.mvzje.client.screen.Screen;
 import org.lwjgl.glfw.GLFWErrorCallback;
-import org.lwjgl.glfw.GLFWVidMode;
-import org.lwjgl.opengl.GL;
-import org.overrun.glutils.Textures;
-import org.overrun.glutils.wnd.Framebuffer;
-import org.overrun.glutils.wnd.GLFWindow;
+import org.overrun.swgl.core.GlfwApplication;
+import org.overrun.swgl.core.cfg.GlobalConfig;
+import org.overrun.swgl.core.gui.font.SwglEasyFont;
+import org.overrun.swgl.core.io.Mouse;
+import org.overrun.swgl.core.io.Window;
+
+import java.util.Objects;
 
 import static org.lwjgl.glfw.GLFW.*;
-import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.opengl.GL11C.*;
+import static org.overrun.swgl.core.gl.GLClear.*;
+import static org.overrun.swgl.core.gl.GLStateMgr.*;
+import static org.overrun.swgl.core.gl.ims.GLImmeMode.*;
 
 /**
  * @author crazy-piggy, squid233
  * @since 0.1.0
  */
-public enum MvZ implements AutoCloseable {
-    INSTANCE;
-
+public class MvZ extends GlfwApplication {
+    private static final MvZ INSTANCE = new MvZ();
     public static final String VERSION = "0.1.0";
-    public GLFWindow window;
-    public Framebuffer framebuffer;
     public Screen screen;
-    private final Timer timer = new Timer(20);
 
-    private void resize(int w, int h) {
-        glViewport(0, 0, w, h);
-        glMatrixMode(GL_PROJECTION);
-        glLoadIdentity();
-        glOrtho(0, w, 0, h, -100, 100);
-        glMatrixMode(GL_MODELVIEW);
+    public static MvZ getInstance() {
+        return INSTANCE;
+    }
+
+    public Window getWindow() {
+        return window;
+    }
+
+    public Mouse getMouse() {
+        return mouse;
+    }
+
+    @Override
+    public void onResize(int width, int height) {
+        glViewport(0, 0, width, height);
+        lglGetMatrix(MatrixMode.PROJECTION).setOrtho(0, width, height, 0, -100, 100);
+        lglMatrixMode(MatrixMode.MODELVIEW);
+        lglLoadIdentity();
+        if (screen != null) {
+            screen.init();
+        }
     }
 
     public void openScreen(Screen screen) {
@@ -41,73 +56,59 @@ public enum MvZ implements AutoCloseable {
         }
     }
 
-    public void init() {
-        GLFWErrorCallback.createPrint().set();
-        glfwInit();
-        glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
+    @Override
+    public void prepare() {
+        GLFWErrorCallback.createPrint(System.err).set();
+        GlobalConfig.initialTitle = "Minecraft vs. Zombies: Java Edition";
+        GlobalConfig.initialSwapInterval = 1;
+    }
+
+    @Override
+    public void preStart() {
         glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
-        window = new GLFWindow(800, 600, "Minecraft vs. Zombies: Java Edition");
+    }
 
-        window.keyCb((hWnd, key, scancode, action, mods) -> {
-            if (action == GLFW_PRESS) {
-                if (key == GLFW_KEY_ESCAPE) {
-                    glfwSetWindowShouldClose(hWnd, true);
-                }
-            }
-        });
-        window.cursorPosCb((hWnd, x, y) -> {
-            window.mouseX = (int) x;
-            window.mouseY = (int) y;
-        });
-        glfwSetMouseButtonCallback(window.hWnd, (hWnd, button, action, mods) -> {
-            if (action == GLFW_PRESS) {
-                if (screen != null) {
-                    screen.mousePress(window.mouseX, window.mouseY, button);
-                }
-            }
-        });
-
-        GLFWVidMode vidMode = glfwGetVideoMode(glfwGetPrimaryMonitor());
+    @Override
+    public void start() {
+        lglRequestContext();
+        onResize(window.getWidth(), window.getHeight());
+        var vidMode = glfwGetVideoMode(glfwGetPrimaryMonitor());
         if (vidMode != null) {
-            window.setPos((vidMode.width() - 800) / 2, (vidMode.height() - 600) / 2);
+            window.moveToCenter(vidMode.width(), vidMode.height());
         }
-
-        framebuffer = new Framebuffer();
-        framebuffer.cb = (hWnd, width, height) -> resize(width, height);
-        framebuffer.init(window);
-
-        window.makeCurr();
-        GL.createCapabilities();
-
-        glClearColor(0, 0, 0, 1);
-        glEnable(GL_TEXTURE_2D);
-        glEnable(GL_BLEND);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-        TextRenderer.init();
-
-        resize(800, 600);
-        glfwSwapInterval(1);
-        timer.advanceTime();
-        window.show();
+        clearColor(0.4f, 0.6f, 0.9f, 1.0f);
+        enableTexture2D();
+        enableBlend();
+        blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        SwglEasyFont.initialize();
+        Textures.init();
     }
 
-    public void run() {
-        double lastTime = glfwGetTime() * 1000;
+    @Override
+    public void onKeyPress(int key, int scancode, int mods) {
+        if (key == GLFW_KEY_ESCAPE) {
+            glfwSetWindowShouldClose(window.getHandle(), true);
+        }
+    }
+
+    @Override
+    public void onMouseBtnPress(int btn, int mods) {
+        if (screen != null) {
+            screen.mousePress(mouse.getIntLastX(), mouse.getIntLastY(), btn);
+        }
+    }
+
+    @Override
+    public void postStart() {
         openScreen(new LoadingScreen());
-        while (!window.shouldClose()) {
-            timer.advanceTime();
-            for (int i = 0; i < timer.ticks; i++) {
-                tick();
-            }
-            render(timer.delta);
-            glfwPollEvents();
-            while (glfwGetTime() * 1000 >= lastTime + 1000) {
-                lastTime += 1000;
-            }
-        }
     }
 
+    @Override
+    public void run() {
+        render(timer.deltaTime);
+    }
+
+    @Override
     public void tick() {
         if (screen != null) {
             screen.tick();
@@ -115,18 +116,21 @@ public enum MvZ implements AutoCloseable {
     }
 
     public void render(double delta) {
-        glClear(GL_COLOR_BUFFER_BIT);
+        clear(COLOR_BUFFER_BIT | DEPTH_BUFFER_BIT);
         if (screen != null) {
             screen.render(delta);
         }
-        window.swapBuffers();
     }
 
     @Override
     public void close() {
+        lglDestroyContext();
+        SwglEasyFont.destroy();
         Textures.close();
-        window.free();
-        glfwTerminate();
-        glfwSetErrorCallback(null).free();
+    }
+
+    @Override
+    public void postClose() {
+        Objects.requireNonNull(glfwSetErrorCallback(null)).free();
     }
 }

@@ -26,9 +26,9 @@ public class Screen implements Drawable, Widget {
     }
 
     public void init() {
-        client = MvZ.INSTANCE;
-        init(client.window.getWidth(),
-            client.window.getHeight());
+        client = MvZ.getInstance();
+        init(client.getWindow().getWidth(),
+            client.getWindow().getHeight());
     }
 
     public <T extends Widget> T addWidget(T widget) {
@@ -45,7 +45,7 @@ public class Screen implements Drawable, Widget {
                            int mouseY,
                            int button) {
         for (var b : buttons) {
-            if (b.isHovered(mouseX, height - mouseY)) {
+            if (b.isHovered(mouseX, mouseY)) {
                 b.onPress();
                 break;
             }
