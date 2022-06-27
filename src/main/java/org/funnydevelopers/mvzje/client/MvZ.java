@@ -5,17 +5,16 @@ import org.funnydevelopers.mvzje.client.screen.Screen;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.overrun.swgl.core.GlfwApplication;
 import org.overrun.swgl.core.cfg.GlobalConfig;
+import org.overrun.swgl.core.cfg.WindowConfig;
+import org.overrun.swgl.core.gl.GLBlendFunc;
 import org.overrun.swgl.core.gui.font.SwglEasyFont;
 import org.overrun.swgl.core.io.Mouse;
 import org.overrun.swgl.core.io.Window;
 
-import java.util.Objects;
-
 import static org.lwjgl.glfw.GLFW.*;
-import static org.lwjgl.opengl.GL11C.*;
+import static org.lwjgl.opengl.GL11.*;
 import static org.overrun.swgl.core.gl.GLClear.*;
 import static org.overrun.swgl.core.gl.GLStateMgr.*;
-import static org.overrun.swgl.core.gl.ims.GLImmeMode.*;
 
 /**
  * @author crazy-piggy, squid233
@@ -40,10 +39,12 @@ public class MvZ extends GlfwApplication {
 
     @Override
     public void onResize(int width, int height) {
-        glViewport(0, 0, width, height);
-        lglGetMatrix(MatrixMode.PROJECTION).setOrtho(0, width, height, 0, -100, 100);
-        lglMatrixMode(MatrixMode.MODELVIEW);
-        lglLoadIdentity();
+        super.onResize(width, height);
+        glMatrixMode(GL_PROJECTION);
+        glLoadIdentity();
+        glOrtho(0, width, height, 0, -100, 100);
+        glMatrixMode(GL_MODELVIEW);
+        glLoadIdentity();
         if (screen != null) {
             screen.init();
         }
@@ -59,18 +60,14 @@ public class MvZ extends GlfwApplication {
     @Override
     public void prepare() {
         GLFWErrorCallback.createPrint(System.err).set();
-        GlobalConfig.initialTitle = "Minecraft vs. Zombies: Java Edition";
-        GlobalConfig.initialSwapInterval = 1;
-    }
-
-    @Override
-    public void preStart() {
-        glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
+        WindowConfig.initialTitle = "Minecraft vs. Zombies: Java Edition";
+        WindowConfig.initialSwapInterval = 1;
+        WindowConfig.visibleBeforeStart = false;
+        GlobalConfig.useLegacyGL = true;
     }
 
     @Override
     public void start() {
-        lglRequestContext();
         onResize(window.getWidth(), window.getHeight());
         var vidMode = glfwGetVideoMode(glfwGetPrimaryMonitor());
         if (vidMode != null) {
@@ -79,7 +76,7 @@ public class MvZ extends GlfwApplication {
         clearColor(0.4f, 0.6f, 0.9f, 1.0f);
         enableTexture2D();
         enableBlend();
-        blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        blendFunc(GLBlendFunc.SRC_ALPHA, GLBlendFunc.ONE_MINUS_SRC_ALPHA);
         SwglEasyFont.initialize();
         Textures.init();
     }
@@ -105,7 +102,7 @@ public class MvZ extends GlfwApplication {
 
     @Override
     public void run() {
-        render(timer.deltaTime);
+        render(timer.partialTick);
     }
 
     @Override
@@ -124,13 +121,7 @@ public class MvZ extends GlfwApplication {
 
     @Override
     public void close() {
-        lglDestroyContext();
         SwglEasyFont.destroy();
         Textures.close();
-    }
-
-    @Override
-    public void postClose() {
-        Objects.requireNonNull(glfwSetErrorCallback(null)).free();
     }
 }

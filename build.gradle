@@ -17,7 +17,7 @@ repositories {
 }
 
 dependencies {
-    implementation 'io.github.over-run:swgl-core:0.1.0'
+    implementation 'io.github.over-run:swgl-core:0.2.0-SNAPSHOT'
     compileOnly 'org.jetbrains:annotations:23.0.0'
     runtimeOnly 'org.lwjgl:lwjgl::natives-windows'
     runtimeOnly 'org.lwjgl:lwjgl-glfw::natives-windows'

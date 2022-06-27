@@ -9,7 +9,7 @@ import org.funnydevelopers.mvzje.client.MvZ;
 public class Main {
     public static void main(String[] args) {
         try (var mvz = MvZ.getInstance()) {
-            mvz.boot();
+            mvz.launch();
         }
     }
 }

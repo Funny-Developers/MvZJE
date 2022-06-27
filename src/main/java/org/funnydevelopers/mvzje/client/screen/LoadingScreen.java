@@ -3,13 +3,13 @@ package org.funnydevelopers.mvzje.client.screen;
 import org.funnydevelopers.mvzje.client.MvZ;
 import org.funnydevelopers.mvzje.client.render.TextRenderer;
 import org.funnydevelopers.mvzje.client.screen.widget.Button;
-import org.overrun.swgl.core.gl.GLDrawMode;
+import org.overrun.swgl.core.gl.GLStateMgr;
 import org.overrun.swgl.core.gui.font.SwglEasyFont;
 
 import static org.funnydevelopers.mvzje.client.Language.translate;
 import static org.funnydevelopers.mvzje.client.Textures.*;
+import static org.lwjgl.opengl.GL11.*;
 import static org.overrun.swgl.core.gl.GLStateMgr.bindTexture2D;
-import static org.overrun.swgl.core.gl.ims.GLImmeMode.*;
 
 /**
  * 开场动画,类似Minecraft启动时的Mojang Studio标志
@@ -29,6 +29,7 @@ public class LoadingScreen extends Screen {
             progress = 0;
             initialized = true;
         }
+        buttons.clear();
         addButton(new Button(width / 2 - 128,
             height - (24 + 32),
             256,
@@ -43,29 +44,25 @@ public class LoadingScreen extends Screen {
                 } else {
                     str = translate("main.start");
                 }
-                lglPushMatrix();
-                lglScale(2.0f);
+                glPushMatrix();
+                glScalef(2.0f, 2.0f, 2.0f);
                 TextRenderer.drawText(
                     x + (width - SwglEasyFont.getWidth(str) * 2.0f) / 2f,
                     y + (height - SwglEasyFont.getHeight(str) * 2.0f) / 2f,
                     str);
-                lglPopMatrix();
+                glPopMatrix();
             }
 
             @Override
             public void hover(double delta) {
                 if (progress >= 100) {
-                    lglColor(1, 1, 1, 0.5f);
-                    lglBegin(GLDrawMode.QUADS);
-                    lglVertex(x, y, 0);
-                    lglEmit();
-                    lglVertex(x, y + height, 0);
-                    lglEmit();
-                    lglVertex(x + width, y + height, 0);
-                    lglEmit();
-                    lglVertex(x + width, y, 0);
-                    lglEmit();
-                    lglEnd();
+                    glColor4f(1, 1, 1, 0.5f);
+                    glBegin(GL_QUADS);
+                    glVertex2f(x, y);
+                    glVertex2f(x, y + height);
+                    glVertex2f(x + width, y + height);
+                    glVertex2f(x + width, y);
+                    glEnd();
                 }
             }
         });
@@ -92,93 +89,77 @@ public class LoadingScreen extends Screen {
     @Override
     public void render(double delta) {
         TEXTURE_LOADING_BG.bind();
-        lglColor(1, 1, 1);
-        lglSetTexCoordArrayState(true);
-        lglBegin(GLDrawMode.QUADS);
-        lglTexCoord(0, 0);
-        lglVertex(0, 0, 0);
-        lglEmit();
-        lglTexCoord(0, 1);
-        lglVertex(0, height, 0);
-        lglEmit();
-        lglTexCoord(1, 1);
-        lglVertex(width, height, 0);
-        lglEmit();
-        lglTexCoord(1, 0);
-        lglVertex(width, 0, 0);
-        lglEmit();
-        lglEnd();
+        glColor3f(1, 1, 1);
+        GLStateMgr.enableTexture2D();
+        glBegin(GL_QUADS);
+        glTexCoord2f(0, 0);
+        glVertex2f(0, 0);
+        glTexCoord2f(0, 1);
+        glVertex2f(0, height);
+        glTexCoord2f(1, 1);
+        glVertex2f(width, height);
+        glTexCoord2f(1, 0);
+        glVertex2f(width, 0);
+        glEnd();
 
-        lglPushMatrix();
-        lglTranslate(width / 2f - 128, height - 24, 0);
-        lglColor(1, 1, 1);
+        glPushMatrix();
+        glTranslatef(width / 2f - 128, height - 24, 0);
+        glColor3f(1, 1, 1);
         TEXTURE_PROGRESS_BAR.bind();
 
-        lglBegin(GLDrawMode.QUADS);
+        glBegin(GL_QUADS);
 
-        lglTexCoord(0, 0.5f);
-        lglVertex(0, -32, 0);
-        lglEmit();
-        lglTexCoord(0, 1);
-        lglVertex(0, 0, 0);
-        lglEmit();
-        lglTexCoord(8.0f, 1);
-        lglVertex(256, 0, 0);
-        lglEmit();
-        lglTexCoord(8.0f, 0.5f);
-        lglVertex(256, -32, 0);
-        lglEmit();
+        glTexCoord2f(0, 0.5f);
+        glVertex2f(0, -32);
+        glTexCoord2f(0, 1);
+        glVertex2f(0, 0);
+        glTexCoord2f(8.0f, 1);
+        glVertex2f(256, 0);
+        glTexCoord2f(8.0f, 0.5f);
+        glVertex2f(256, -32);
 
         float unmlProgress = progress * 2.56f;
         float u = unmlProgress / 32.0f;
-        lglTexCoord(0, 0);
-        lglVertex(0, -32, 0);
-        lglEmit();
-        lglTexCoord(0, 0.5f);
-        lglVertex(0, 0, 0);
-        lglEmit();
-        lglTexCoord(u, 0.5f);
-        lglVertex(unmlProgress, 0, 0);
-        lglEmit();
-        lglTexCoord(u, 0);
-        lglVertex(unmlProgress, -32, 0);
-        lglEmit();
+        glTexCoord2f(0, 0);
+        glVertex2f(0, -32);
+        glTexCoord2f(0, 0.5f);
+        glVertex2f(0, 0);
+        glTexCoord2f(u, 0.5f);
+        glVertex2f(unmlProgress, 0);
+        glTexCoord2f(u, 0);
+        glVertex2f(unmlProgress, -32);
 
-        lglEnd();
+        glEnd();
 
         bindTexture2D(0);
 
         if (progress >= 100) {
-            lglPushMatrix();
-            lglTranslate(256 - 16, -32, 0);
+            glPushMatrix();
+            glTranslatef(256 - 16, -32, 0);
             TEXTURE_DAISY.bind();
             float v = 1.0f - daisy / 16.0f;
-            lglBegin(GLDrawMode.QUADS);
-            lglTexCoord(0, v);
-            lglVertex(0, -daisy, 0);
-            lglEmit();
-            lglTexCoord(0, 1);
-            lglVertex(0, 0, 0);
-            lglEmit();
-            lglTexCoord(1, 1);
-            lglVertex(16, 0, 0);
-            lglEmit();
-            lglTexCoord(1, v);
-            lglVertex(16, -daisy, 0);
-            lglEmit();
-            lglEnd();
+            glBegin(GL_QUADS);
+            glTexCoord2f(0, v);
+            glVertex2f(0, -daisy);
+            glTexCoord2f(0, 1);
+            glVertex2f(0, 0);
+            glTexCoord2f(1, 1);
+            glVertex2f(16, 0);
+            glTexCoord2f(1, v);
+            glVertex2f(16, -daisy);
+            glEnd();
             bindTexture2D(0);
-            lglPopMatrix();
+            glPopMatrix();
         }
-        lglSetTexCoordArrayState(false);
+        GLStateMgr.disableTexture2D();
 
-        lglPopMatrix();
+        glPopMatrix();
 
-        lglPushMatrix();
+        glPushMatrix();
         var text = "v" + MvZ.VERSION;
-        lglScale(2.0f);
+        glScalef(2.0f, 2.0f, 2.0f);
         TextRenderer.drawText(width - SwglEasyFont.getWidth(text) * 2.0f, height - SwglEasyFont.getHeight(text) * 2.0f, text);
-        lglPopMatrix();
+        glPopMatrix();
 
         super.render(delta);
     }

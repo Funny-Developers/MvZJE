@@ -1,14 +1,12 @@
 package org.funnydevelopers.mvzje.client.render;
 
-import org.overrun.swgl.core.gl.GLDrawMode;
 import org.overrun.swgl.core.gl.GLStateMgr;
 import org.overrun.swgl.core.gui.font.SwglEasyFont;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.overrun.swgl.core.gl.ims.GLImmeMode.*;
-import static org.overrun.swgl.core.gl.ims.GLLists.*;
+import static org.lwjgl.opengl.GL11.*;
 
 /**
  * @author squid233
@@ -21,39 +19,34 @@ public class TextRenderer {
         if (!textLists.containsKey(text)) {
             var desc = SwglEasyFont.createTextDesc(0, 0, text);
             float invTexSz = 1.0f / SwglEasyFont.getTextureSize();
-            int lst = lglGenList();
-            lglNewList(lst);
-            lglBegin(GLDrawMode.QUADS);
-            lglColor(1, 1, 1, 1);
+            int lst = glGenLists(1);
+            glNewList(lst, GL_COMPILE);
+            glBegin(GL_QUADS);
+            glColor3f(1, 1, 1);
             for (int i = 0, c = desc.getLength(); i < c; i++) {
                 var xy0 = desc.getXY0(i);
                 var xy1 = desc.getXY1(i);
                 var glyph = desc.getGlyph(i);
-                lglTexCoord(glyph.u0() * invTexSz, glyph.v0() * invTexSz);
-                lglVertex(xy0.x, xy0.y);
-                lglEmit();
-                lglTexCoord(glyph.u0() * invTexSz, glyph.v1() * invTexSz);
-                lglVertex(xy0.x, xy1.y);
-                lglEmit();
-                lglTexCoord(glyph.u1() * invTexSz, glyph.v1() * invTexSz);
-                lglVertex(xy1.x, xy1.y);
-                lglEmit();
-                lglTexCoord(glyph.u1() * invTexSz, glyph.v0() * invTexSz);
-                lglVertex(xy1.x, xy0.y);
-                lglEmit();
+                glTexCoord2f(glyph.u0() * invTexSz, glyph.v0() * invTexSz);
+                glVertex2f(xy0.x, xy0.y);
+                glTexCoord2f(glyph.u0() * invTexSz, glyph.v1() * invTexSz);
+                glVertex2f(xy0.x, xy1.y);
+                glTexCoord2f(glyph.u1() * invTexSz, glyph.v1() * invTexSz);
+                glVertex2f(xy1.x, xy1.y);
+                glTexCoord2f(glyph.u1() * invTexSz, glyph.v0() * invTexSz);
+                glVertex2f(xy1.x, xy0.y);
             }
-            lglEnd();
-            lglEndList();
+            glEnd();
+            glEndList();
             textLists.put(text, lst);
         }
         SwglEasyFont.bindTexture();
         GLStateMgr.enableTexture2D();
-        lglSetTexCoordArrayState(true);
-        lglPushMatrix();
-        lglGetMatrixMode().translateLocal(x, y, 0);
-        lglCallList(textLists.get(text));
-        lglSetTexCoordArrayState(false);
+        glPushMatrix();
+        glTranslatef(x, y, 0);
+        glCallList(textLists.get(text));
+        GLStateMgr.disableTexture2D();
         SwglEasyFont.unbindTexture();
-        lglPopMatrix();
+        glPopMatrix();
     }
 }
