@@ -23,7 +23,8 @@ dependencies {
     runtimeOnly 'org.lwjgl:lwjgl-glfw::natives-windows'
     runtimeOnly 'org.lwjgl:lwjgl-jemalloc::natives-windows'
     runtimeOnly 'org.lwjgl:lwjgl-opengl::natives-windows'
-    runtimeOnly 'org.lwjgl:lwjgl-stb::natives-windows'
+    runtimeOnly 'org.lwjgl:lwjgl-stb:3.3.1'
+    implementation 'org.slf4j:slf4j-simple:2.0.0-alpha7'
 }
 
 tasks.withType(JavaCompile) {

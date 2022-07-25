@@ -1,10 +1,11 @@
 package org.funnydevelopers.mvzje.client;
 
+import org.funnydevelopers.mvzje.client.render.TextRenderer;
+import org.funnydevelopers.mvzje.client.screen.DebugHud;
 import org.funnydevelopers.mvzje.client.screen.LoadingScreen;
 import org.funnydevelopers.mvzje.client.screen.Screen;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.overrun.swgl.core.GlfwApplication;
-import org.overrun.swgl.core.cfg.GlobalConfig;
 import org.overrun.swgl.core.cfg.WindowConfig;
 import org.overrun.swgl.core.gl.GLBlendFunc;
 import org.overrun.swgl.core.gui.font.SwglEasyFont;
@@ -24,6 +25,7 @@ public class MvZ extends GlfwApplication {
     private static final MvZ INSTANCE = new MvZ();
     public static final String VERSION = "0.1.0";
     public Screen screen;
+    private boolean debugHudVisible = false;
 
     public static MvZ getInstance() {
         return INSTANCE;
@@ -63,12 +65,13 @@ public class MvZ extends GlfwApplication {
         WindowConfig.initialTitle = "Minecraft vs. Zombies: Java Edition";
         WindowConfig.initialSwapInterval = 1;
         WindowConfig.visibleBeforeStart = false;
-        GlobalConfig.useLegacyGL = true;
+        WindowConfig.setRequiredGlVer(1, 0);
+        WindowConfig.forwardCompatible = false;
+        WindowConfig.coreProfile = false;
     }
 
     @Override
     public void start() {
-        onResize(window.getWidth(), window.getHeight());
         var vidMode = glfwGetVideoMode(glfwGetPrimaryMonitor());
         if (vidMode != null) {
             window.moveToCenter(vidMode.width(), vidMode.height());
@@ -86,6 +89,14 @@ public class MvZ extends GlfwApplication {
         if (key == GLFW_KEY_ESCAPE) {
             glfwSetWindowShouldClose(window.getHandle(), true);
         }
+        if (key == GLFW_KEY_F3) {
+            debugHudVisible = !debugHudVisible;
+        }
+    }
+
+    @Override
+    public void onCursorPos(double x, double y, double xd, double yd) {
+
     }
 
     @Override
@@ -117,10 +128,14 @@ public class MvZ extends GlfwApplication {
         if (screen != null) {
             screen.render(delta);
         }
+        if (debugHudVisible) {
+            DebugHud.render(mouse);
+        }
     }
 
     @Override
     public void close() {
+        TextRenderer.free();
         SwglEasyFont.destroy();
         Textures.close();
     }

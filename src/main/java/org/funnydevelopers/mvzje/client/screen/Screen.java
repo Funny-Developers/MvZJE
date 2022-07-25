@@ -8,6 +8,9 @@ import org.funnydevelopers.mvzje.client.screen.widget.Widget;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.lwjgl.glfw.GLFW.*;
+import static org.lwjgl.glfw.GLFW.GLFW_FALSE;
+
 /**
  * @author squid233
  * @since 0.1.0

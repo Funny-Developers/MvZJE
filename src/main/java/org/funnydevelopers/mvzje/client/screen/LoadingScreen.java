@@ -44,6 +44,7 @@ public class LoadingScreen extends Screen {
                 } else {
                     str = translate("main.start");
                 }
+                TextRenderer.genText(str);
                 glPushMatrix();
                 glScalef(2.0f, 2.0f, 2.0f);
                 TextRenderer.drawText(
@@ -155,8 +156,9 @@ public class LoadingScreen extends Screen {
 
         glPopMatrix();
 
-        glPushMatrix();
         var text = "v" + MvZ.VERSION;
+        TextRenderer.genText(text);
+        glPushMatrix();
         glScalef(2.0f, 2.0f, 2.0f);
         TextRenderer.drawText(width - SwglEasyFont.getWidth(text) * 2.0f, height - SwglEasyFont.getHeight(text) * 2.0f, text);
         glPopMatrix();
