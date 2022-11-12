@@ -2,24 +2,20 @@ package org.funnydevelopers.mvzje.client.screen;
 
 import org.funnydevelopers.mvzje.client.MvZClient;
 import org.funnydevelopers.mvzje.client.screen.widget.Button;
-import org.overrun.swgl.core.gl.GLStateMgr;
 import org.overrun.swgl.core.gui.font.UnifontTextBatch;
-import org.overrun.swgl.core.util.LogFactory9;
-import org.slf4j.Logger;
 
 import static org.funnydevelopers.mvzje.client.Language.translate;
 import static org.funnydevelopers.mvzje.client.Textures.*;
 import static org.lwjgl.opengl.GL11.*;
-import static org.overrun.swgl.core.gl.GLStateMgr.bindTexture2D;
+import static org.overrun.swgl.core.gl.GLStateMgr.*;
 
 /**
- * 开场动画,类似Minecraft启动时的Mojang Studio标志
+ * The loading screen, player first see.
  *
  * @author crazy-piggy, squid233
  * @since 0.1.0
  */
 public class LoadingScreen extends Screen {
-    private static final Logger logger = LogFactory9.getLoggerS();
     private int progress;
     private int daisy;
     private boolean initialized;
@@ -36,7 +32,7 @@ public class LoadingScreen extends Screen {
             height - (24 + 32),
             256,
             32,
-            x -> logger.info(x.toString())) {
+            x -> client.openScreen(new MainScreen())) {
             @Override
             public void render(double delta) {
                 super.render(delta);
@@ -89,7 +85,7 @@ public class LoadingScreen extends Screen {
     public void render(double delta) {
         TEXTURE_LOADING_BG.bind();
         glColor3f(1, 1, 1);
-        GLStateMgr.enableTexture2D();
+        enableTexture2D();
         glBegin(GL_QUADS);
         glTexCoord2f(0, 0);
         glVertex2f(0, 0);
@@ -147,10 +143,10 @@ public class LoadingScreen extends Screen {
             glTexCoord2f(1, v);
             glVertex2f(16, -daisy);
             glEnd();
-            bindTexture2D(0);
+            TEXTURE_DAISY.unbind();
             glPopMatrix();
         }
-        GLStateMgr.disableTexture2D();
+        disableTexture2D();
 
         glPopMatrix();
 

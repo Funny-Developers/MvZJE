@@ -55,11 +55,14 @@ public class Screen implements Drawable, Widget {
     public void tick() {
     }
 
+    public void onClose() {
+    }
+
     @Override
     public void render(double delta) {
         for (var widget : widgets) {
-            if (widget instanceof Drawable) {
-                ((Drawable) widget).render(delta);
+            if (widget instanceof Drawable drawable) {
+                drawable.render(delta);
             }
         }
         for (var b : buttons) {

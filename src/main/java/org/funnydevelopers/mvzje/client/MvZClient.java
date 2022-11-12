@@ -25,6 +25,7 @@ public class MvZClient extends GlfwApplication {
     public Screen screen;
     public UnifontTextBatch textBatch;
     public TextRenderer textRenderer;
+    private boolean debugHudVisible = false;
 
     public static MvZClient getInstance() {
         return INSTANCE;
@@ -52,6 +53,9 @@ public class MvZClient extends GlfwApplication {
     }
 
     public void openScreen(Screen screen) {
+        if (this.screen != null) {
+            this.screen.onClose();
+        }
         this.screen = screen;
         if (screen != null) {
             screen.init();
@@ -60,13 +64,13 @@ public class MvZClient extends GlfwApplication {
 
     @Override
     public void prepare() {
-        WindowConfig.initialTitle = "Minecraft vs. Zombies: Java Edition";
+        WindowConfig.initialTitle = "Minecraft vs. Zombies: Java Edition " + VERSION;
         WindowConfig.initialSwapInterval = 1;
         WindowConfig.visibleBeforeStart = false;
         WindowConfig.resizable = false;
+        WindowConfig.setRequiredGlVer(1, 0);
         WindowConfig.coreProfile = false;
         WindowConfig.forwardCompatible = false;
-        WindowConfig.setRequiredGlVer(1, 0);
     }
 
     @Override
@@ -86,6 +90,13 @@ public class MvZClient extends GlfwApplication {
 
     @Override
     public void onKeyPress(int key, int scancode, int mods) {
+        if (key == GLFW_KEY_F3) {
+            debugHudVisible = !debugHudVisible;
+        }
+    }
+
+    @Override
+    public void onCursorPos(double x, double y, double xd, double yd) {
     }
 
     @Override
@@ -117,11 +128,22 @@ public class MvZClient extends GlfwApplication {
         if (screen != null) {
             screen.render(delta);
         }
+        if (debugHudVisible) {
+            renderDebugHud();
+        }
+    }
+
+    private void renderDebugHud() {
+        textRenderer.drawText(0, 0, WindowConfig.initialTitle);
+        textRenderer.drawText(0, 16, frames + " fps");
+
+        textRenderer.drawText(0, 3 * 16,
+            "Cursor pos: (" + mouse.getIntLastX() + ", " + mouse.getIntLastY() + ")");
     }
 
     @Override
     public void close() {
         textBatch.dispose();
-        Textures.close();
+        Textures.dispose();
     }
 }
