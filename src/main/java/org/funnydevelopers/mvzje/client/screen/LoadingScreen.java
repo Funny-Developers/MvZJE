@@ -1,10 +1,11 @@
 package org.funnydevelopers.mvzje.client.screen;
 
-import org.funnydevelopers.mvzje.client.MvZ;
-import org.funnydevelopers.mvzje.client.render.TextRenderer;
+import org.funnydevelopers.mvzje.client.MvZClient;
 import org.funnydevelopers.mvzje.client.screen.widget.Button;
 import org.overrun.swgl.core.gl.GLStateMgr;
-import org.overrun.swgl.core.gui.font.SwglEasyFont;
+import org.overrun.swgl.core.gui.font.UnifontTextBatch;
+import org.overrun.swgl.core.util.LogFactory9;
+import org.slf4j.Logger;
 
 import static org.funnydevelopers.mvzje.client.Language.translate;
 import static org.funnydevelopers.mvzje.client.Textures.*;
@@ -18,6 +19,7 @@ import static org.overrun.swgl.core.gl.GLStateMgr.bindTexture2D;
  * @since 0.1.0
  */
 public class LoadingScreen extends Screen {
+    private static final Logger logger = LogFactory9.getLoggerS();
     private int progress;
     private int daisy;
     private boolean initialized;
@@ -34,7 +36,7 @@ public class LoadingScreen extends Screen {
             height - (24 + 32),
             256,
             32,
-            System.out::println) {
+            x -> logger.info(x.toString())) {
             @Override
             public void render(double delta) {
                 super.render(delta);
@@ -44,13 +46,10 @@ public class LoadingScreen extends Screen {
                 } else {
                     str = translate("main.start");
                 }
-                glPushMatrix();
-                glScalef(2.0f, 2.0f, 2.0f);
-                TextRenderer.drawText(
-                    x + (width - SwglEasyFont.getWidth(str) * 2.0f) / 2f,
-                    y + (height - SwglEasyFont.getHeight(str) * 2.0f) / 2f,
+                client.textRenderer.drawText(
+                    x + (width - UnifontTextBatch.getTextWidth(str)) * 0.5f,
+                    y + (height - UnifontTextBatch.CHAR_HEIGHT) * 0.5f,
                     str);
-                glPopMatrix();
             }
 
             @Override
@@ -155,11 +154,11 @@ public class LoadingScreen extends Screen {
 
         glPopMatrix();
 
-        glPushMatrix();
-        var text = "v" + MvZ.VERSION;
-        glScalef(2.0f, 2.0f, 2.0f);
-        TextRenderer.drawText(width - SwglEasyFont.getWidth(text) * 2.0f, height - SwglEasyFont.getHeight(text) * 2.0f, text);
-        glPopMatrix();
+        var text = "v" + MvZClient.VERSION;
+        client.textRenderer.drawText(
+            width - UnifontTextBatch.getTextWidth(text),
+            height - UnifontTextBatch.CHAR_HEIGHT,
+            text);
 
         super.render(delta);
     }

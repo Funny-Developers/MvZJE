@@ -1,10 +1,7 @@
 package org.funnydevelopers.mvzje.client.render;
 
+import org.funnydevelopers.mvzje.client.MvZClient;
 import org.overrun.swgl.core.gl.GLStateMgr;
-import org.overrun.swgl.core.gui.font.SwglEasyFont;
-
-import java.util.HashMap;
-import java.util.Map;
 
 import static org.lwjgl.opengl.GL11.*;
 
@@ -13,40 +10,25 @@ import static org.lwjgl.opengl.GL11.*;
  * @since 0.1.0
  */
 public class TextRenderer {
-    private static final Map<String, Integer> textLists = new HashMap<>();
+    private final MvZClient client;
 
-    public static void drawText(float x, float y, String text) {
-        if (!textLists.containsKey(text)) {
-            var desc = SwglEasyFont.createTextDesc(0, 0, text);
-            float invTexSz = 1.0f / SwglEasyFont.getTextureSize();
-            int lst = glGenLists(1);
-            glNewList(lst, GL_COMPILE);
-            glBegin(GL_QUADS);
-            glColor3f(1, 1, 1);
-            for (int i = 0, c = desc.getLength(); i < c; i++) {
-                var xy0 = desc.getXY0(i);
-                var xy1 = desc.getXY1(i);
-                var glyph = desc.getGlyph(i);
-                glTexCoord2f(glyph.u0() * invTexSz, glyph.v0() * invTexSz);
-                glVertex2f(xy0.x, xy0.y);
-                glTexCoord2f(glyph.u0() * invTexSz, glyph.v1() * invTexSz);
-                glVertex2f(xy0.x, xy1.y);
-                glTexCoord2f(glyph.u1() * invTexSz, glyph.v1() * invTexSz);
-                glVertex2f(xy1.x, xy1.y);
-                glTexCoord2f(glyph.u1() * invTexSz, glyph.v0() * invTexSz);
-                glVertex2f(xy1.x, xy0.y);
-            }
-            glEnd();
-            glEndList();
-            textLists.put(text, lst);
-        }
-        SwglEasyFont.bindTexture();
+    public TextRenderer(MvZClient client) {
+        this.client = client;
+    }
+
+    public void drawText(float x, float y,
+                         String text) {
+        var textBatch = client.textBatch;
+        textBatch.bindTexture();
         GLStateMgr.enableTexture2D();
-        glPushMatrix();
-        glTranslatef(x, y, 0);
-        glCallList(textLists.get(text));
+        glColor3f(1, 1, 1);
+        glBegin(GL_QUADS);
+        textBatch.drawText(text, x, y, false, (x1, y1, z, r, g, b, a, s, t, p, nx, ny, nz, color, tex, normal, i) -> {
+            glTexCoord2f(s, t);
+            glVertex2f(x1, y1);
+        });
+        glEnd();
         GLStateMgr.disableTexture2D();
-        SwglEasyFont.unbindTexture();
-        glPopMatrix();
+        textBatch.unbindTexture();
     }
 }

@@ -1,10 +1,11 @@
 package org.funnydevelopers.mvzje.client;
 
-import org.overrun.swgl.core.asset.tex.ITextureParam;
 import org.overrun.swgl.core.asset.tex.Texture2D;
+import org.overrun.swgl.core.asset.tex.TextureParam;
 import org.overrun.swgl.core.io.IFileProvider;
 
-import static org.lwjgl.opengl.GL13C.*;
+import static org.lwjgl.opengl.GL13C.GL_NEAREST;
+import static org.lwjgl.opengl.GL13C.GL_REPEAT;
 
 /**
  * @author squid233
@@ -17,22 +18,15 @@ public class Textures {
     public static Texture2D TEXTURE_LOADING_BG;
 
     public static void init() {
-        ITextureParam param = target -> {
-            glTexParameteri(target, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-            glTexParameteri(target, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        };
-        TEXTURE_PROGRESS_BAR = new Texture2D();
-        TEXTURE_PROGRESS_BAR.setParam(target -> {
-            param.set(target);
-            glTexParameteri(target, GL_TEXTURE_WRAP_S, GL_REPEAT);
-        });
-        TEXTURE_PROGRESS_BAR.reload("progress_bar.png", FILE_PROVIDER);
-        TEXTURE_DAISY = new Texture2D();
-        TEXTURE_DAISY.setParam(param);
-        TEXTURE_DAISY.reload("daisy.png", FILE_PROVIDER);
-        TEXTURE_LOADING_BG = new Texture2D();
-        TEXTURE_LOADING_BG.setParam(param);
-        TEXTURE_LOADING_BG.reload("loading_bg.png", FILE_PROVIDER);
+        var param = new TextureParam()
+            .minFilter(GL_NEAREST)
+            .magFilter(GL_NEAREST);
+        TEXTURE_PROGRESS_BAR = new Texture2D("progress_bar.png", FILE_PROVIDER,
+            (t, b) -> t.setParam(new TextureParam().fromOther(param).wrapS(GL_REPEAT)));
+        TEXTURE_DAISY = new Texture2D("daisy.png", FILE_PROVIDER,
+            (t, b) -> t.setParam(param));
+        TEXTURE_LOADING_BG = new Texture2D("loading_bg.png", FILE_PROVIDER,
+            (t, b) -> t.setParam(param));
     }
 
     public static void close() {

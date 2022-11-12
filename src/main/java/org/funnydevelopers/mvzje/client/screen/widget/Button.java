@@ -1,6 +1,6 @@
 package org.funnydevelopers.mvzje.client.screen.widget;
 
-import org.funnydevelopers.mvzje.client.MvZ;
+import org.funnydevelopers.mvzje.client.MvZClient;
 import org.funnydevelopers.mvzje.client.render.Drawable;
 
 /**
@@ -57,7 +57,7 @@ public class Button implements Drawable, Widget {
 
     @Override
     public void render(double delta) {
-        var client = MvZ.getInstance();
+        var client = MvZClient.getInstance();
         var mouse = client.getMouse();
         isHovered = isHovered(mouse.getIntLastX(),
             mouse.getIntLastY());

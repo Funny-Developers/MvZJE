@@ -1,6 +1,6 @@
 package org.funnydevelopers.mvzje.client.screen;
 
-import org.funnydevelopers.mvzje.client.MvZ;
+import org.funnydevelopers.mvzje.client.MvZClient;
 import org.funnydevelopers.mvzje.client.render.Drawable;
 import org.funnydevelopers.mvzje.client.screen.widget.Button;
 import org.funnydevelopers.mvzje.client.screen.widget.Widget;
@@ -15,7 +15,7 @@ import java.util.List;
 public class Screen implements Drawable, Widget {
     protected final List<Widget> widgets = new ArrayList<>();
     protected final List<Button> buttons = new ArrayList<>();
-    protected MvZ client;
+    protected MvZClient client;
     protected int width;
     protected int height;
 
@@ -26,7 +26,7 @@ public class Screen implements Drawable, Widget {
     }
 
     public void init() {
-        client = MvZ.getInstance();
+        client = MvZClient.getInstance();
         init(client.getWindow().getWidth(),
             client.getWindow().getHeight());
     }

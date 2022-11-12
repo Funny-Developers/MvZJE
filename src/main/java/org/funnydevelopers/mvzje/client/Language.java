@@ -9,7 +9,7 @@ import java.util.ResourceBundle;
  */
 public class Language {
     private static final ResourceBundle BUNDLE =
-        ResourceBundle.getBundle("translat", Locale.US);
+        ResourceBundle.getBundle("l10n", Locale.getDefault());
 
     public static String translate(String key) {
         return BUNDLE.getString(key);

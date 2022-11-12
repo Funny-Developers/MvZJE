@@ -1,6 +1,6 @@
 package org.funnydevelopers.mvzje.client.main;
 
-import org.funnydevelopers.mvzje.client.MvZ;
+import org.funnydevelopers.mvzje.client.MvZClient;
 
 /**
  * @author crazy-piggy, squid233
@@ -8,7 +8,7 @@ import org.funnydevelopers.mvzje.client.MvZ;
  */
 public class Main {
     public static void main(String[] args) {
-        try (var mvz = MvZ.getInstance()) {
+        try (var mvz = MvZClient.getInstance()) {
             mvz.launch();
         }
     }

@@ -1,13 +1,12 @@
 package org.funnydevelopers.mvzje.client;
 
+import org.funnydevelopers.mvzje.client.render.TextRenderer;
 import org.funnydevelopers.mvzje.client.screen.LoadingScreen;
 import org.funnydevelopers.mvzje.client.screen.Screen;
-import org.lwjgl.glfw.GLFWErrorCallback;
 import org.overrun.swgl.core.GlfwApplication;
-import org.overrun.swgl.core.cfg.GlobalConfig;
 import org.overrun.swgl.core.cfg.WindowConfig;
 import org.overrun.swgl.core.gl.GLBlendFunc;
-import org.overrun.swgl.core.gui.font.SwglEasyFont;
+import org.overrun.swgl.core.gui.font.UnifontTextBatch;
 import org.overrun.swgl.core.io.Mouse;
 import org.overrun.swgl.core.io.Window;
 
@@ -20,12 +19,14 @@ import static org.overrun.swgl.core.gl.GLStateMgr.*;
  * @author crazy-piggy, squid233
  * @since 0.1.0
  */
-public class MvZ extends GlfwApplication {
-    private static final MvZ INSTANCE = new MvZ();
+public class MvZClient extends GlfwApplication {
+    private static final MvZClient INSTANCE = new MvZClient();
     public static final String VERSION = "0.1.0";
     public Screen screen;
+    public UnifontTextBatch textBatch;
+    public TextRenderer textRenderer;
 
-    public static MvZ getInstance() {
+    public static MvZClient getInstance() {
         return INSTANCE;
     }
 
@@ -59,16 +60,17 @@ public class MvZ extends GlfwApplication {
 
     @Override
     public void prepare() {
-        GLFWErrorCallback.createPrint(System.err).set();
         WindowConfig.initialTitle = "Minecraft vs. Zombies: Java Edition";
         WindowConfig.initialSwapInterval = 1;
         WindowConfig.visibleBeforeStart = false;
-        GlobalConfig.useLegacyGL = true;
+        WindowConfig.resizable = false;
+        WindowConfig.coreProfile = false;
+        WindowConfig.forwardCompatible = false;
+        WindowConfig.setRequiredGlVer(1, 0);
     }
 
     @Override
     public void start() {
-        onResize(window.getWidth(), window.getHeight());
         var vidMode = glfwGetVideoMode(glfwGetPrimaryMonitor());
         if (vidMode != null) {
             window.moveToCenter(vidMode.width(), vidMode.height());
@@ -77,15 +79,13 @@ public class MvZ extends GlfwApplication {
         enableTexture2D();
         enableBlend();
         blendFunc(GLBlendFunc.SRC_ALPHA, GLBlendFunc.ONE_MINUS_SRC_ALPHA);
-        SwglEasyFont.initialize();
+        textBatch = UnifontTextBatch.getInstance();
+        textRenderer = new TextRenderer(this);
         Textures.init();
     }
 
     @Override
     public void onKeyPress(int key, int scancode, int mods) {
-        if (key == GLFW_KEY_ESCAPE) {
-            glfwSetWindowShouldClose(window.getHandle(), true);
-        }
     }
 
     @Override
@@ -121,7 +121,7 @@ public class MvZ extends GlfwApplication {
 
     @Override
     public void close() {
-        SwglEasyFont.destroy();
+        textBatch.dispose();
         Textures.close();
     }
 }
