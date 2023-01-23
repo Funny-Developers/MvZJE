@@ -22,12 +22,11 @@
  * SOFTWARE.
  */
 
-package org.funnydevelopers.mvzje.game;
+package org.funnydevelopers.mvzje.util;
 
 /**
  * @author crazy-piggy
  * @since 0.1.0
  */
-public class Instruments {
-    //器械注册
+public class Registry {
 }

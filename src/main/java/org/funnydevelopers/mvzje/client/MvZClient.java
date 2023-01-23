@@ -1,149 +1,114 @@
+/*
+ * MIT License
+ *
+ * Copyright (c) 2021-2023 Funny Developers
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
 package org.funnydevelopers.mvzje.client;
 
-import org.funnydevelopers.mvzje.client.render.TextRenderer;
 import org.funnydevelopers.mvzje.client.screen.LoadingScreen;
-import org.funnydevelopers.mvzje.client.screen.Screen;
-import org.overrun.swgl.core.GlfwApplication;
-import org.overrun.swgl.core.cfg.WindowConfig;
-import org.overrun.swgl.core.gl.GLBlendFunc;
-import org.overrun.swgl.core.gui.font.UnifontTextBatch;
-import org.overrun.swgl.core.io.Mouse;
-import org.overrun.swgl.core.io.Window;
+import org.jetbrains.annotations.NotNull;
+import org.lwjgl.glfw.GLFW;
+import union.xenfork.fe2d.Fe2D;
+import union.xenfork.fe2d.Game;
+import union.xenfork.fe2d.Input;
+import union.xenfork.fe2d.graphics.GLStateManager;
+import union.xenfork.fe2d.graphics.batch.SpriteBatch;
+import union.xenfork.fe2d.graphics.font.Font;
+import union.xenfork.fe2d.graphics.font.TextRenderer;
+import union.xenfork.fe2d.gui.layout.Alignment;
 
-import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
-import static org.overrun.swgl.core.gl.GLClear.*;
-import static org.overrun.swgl.core.gl.GLStateMgr.*;
+import static union.xenfork.fe2d.gui.screen.ScreenUtil.*;
 
 /**
  * @author crazy-piggy, squid233
  * @since 0.1.0
  */
-public class MvZClient extends GlfwApplication {
+public final class MvZClient extends Game {
     private static final MvZClient INSTANCE = new MvZClient();
     public static final String VERSION = "0.1.0";
-    public Screen screen;
-    public UnifontTextBatch textBatch;
-    public TextRenderer textRenderer;
+    public static final String TITLE = "Minecraft vs. Zombies: Java Edition " + VERSION;
+    public static final String NAMESPACE = "mvzje";
+    public SpriteBatch spriteBatch;
     private boolean debugHudVisible = false;
 
     public static MvZClient getInstance() {
         return INSTANCE;
     }
 
-    public Window getWindow() {
-        return window;
-    }
-
-    public Mouse getMouse() {
-        return mouse;
-    }
-
-    @Override
-    public void onResize(int width, int height) {
-        super.onResize(width, height);
-        glMatrixMode(GL_PROJECTION);
-        glLoadIdentity();
-        glOrtho(0, width, height, 0, -100, 100);
-        glMatrixMode(GL_MODELVIEW);
-        glLoadIdentity();
-        if (screen != null) {
-            screen.init();
-        }
-    }
-
-    public void openScreen(Screen screen) {
-        if (this.screen != null) {
-            this.screen.onClose();
-        }
-        this.screen = screen;
-        if (screen != null) {
-            screen.init();
-        }
-    }
-
-    @Override
-    public void prepare() {
-        WindowConfig.initialTitle = "Minecraft vs. Zombies: Java Edition " + VERSION;
-        WindowConfig.initialSwapInterval = 1;
-        WindowConfig.visibleBeforeStart = false;
-        WindowConfig.resizable = false;
-        WindowConfig.setRequiredGlVer(1, 0);
-        WindowConfig.coreProfile = false;
-        WindowConfig.forwardCompatible = false;
-    }
-
     @Override
     public void start() {
-        var vidMode = glfwGetVideoMode(glfwGetPrimaryMonitor());
-        if (vidMode != null) {
-            window.moveToCenter(vidMode.width(), vidMode.height());
-        }
-        clearColor(0.4f, 0.6f, 0.9f, 1.0f);
-        enableTexture2D();
-        enableBlend();
-        blendFunc(GLBlendFunc.SRC_ALPHA, GLBlendFunc.ONE_MINUS_SRC_ALPHA);
-        textBatch = UnifontTextBatch.getInstance();
-        textRenderer = new TextRenderer(this);
+        super.start();
+        GLFW.glfwWindowHint(GLFW.GLFW_RESIZABLE, GLFW.GLFW_FALSE);
+    }
+
+    @Override
+    public void init() {
+        super.init();
+        glClearColor(0.4f, 0.6f, 0.9f, 1.0f);
+        GLStateManager.enableBlend();
+        GLStateManager.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         Textures.init();
+
+        spriteBatch = new SpriteBatch();
+        Fe2D.setSpriteRenderer(spriteBatch);
+
+        openScreen(new LoadingScreen(this));
     }
 
     @Override
-    public void onKeyPress(int key, int scancode, int mods) {
-        if (key == GLFW_KEY_F3) {
+    public void onKey(int key, int scancode, Input.@NotNull Action action, int mods) {
+        super.onKey(key, scancode, action, mods);
+        if (key == Input.KEY_F3 && action == Input.Action.PRESS) {
             debugHudVisible = !debugHudVisible;
-        }
-    }
-
-    @Override
-    public void onCursorPos(double x, double y, double xd, double yd) {
-    }
-
-    @Override
-    public void onMouseBtnPress(int btn, int mods) {
-        if (screen != null) {
-            screen.mousePress(mouse.getIntLastX(), mouse.getIntLastY(), btn);
-        }
-    }
-
-    @Override
-    public void postStart() {
-        openScreen(new LoadingScreen());
-    }
-
-    @Override
-    public void run() {
-        render(timer.partialTick);
-    }
-
-    @Override
-    public void tick() {
-        if (screen != null) {
-            screen.tick();
         }
     }
 
     public void render(double delta) {
         clear(COLOR_BUFFER_BIT | DEPTH_BUFFER_BIT);
-        if (screen != null) {
-            screen.render(delta);
-        }
+        super.render(delta);
         if (debugHudVisible) {
             renderDebugHud();
         }
     }
 
     private void renderDebugHud() {
-        textRenderer.drawText(0, 0, WindowConfig.initialTitle);
-        textRenderer.drawText(0, 16, frames + " fps");
+        TextRenderer textRenderer = Fe2D.textRenderer();
+        Font font = Fe2D.defaultFont();
+        int height = Fe2D.graphics.height();
 
-        textRenderer.drawText(0, 3 * 16,
-            "Cursor pos: (" + mouse.getIntLastX() + ", " + mouse.getIntLastY() + ")");
+        textRenderer.begin();
+        textRenderer.draw(font, TITLE, 0, height - font.getTextHeight(TITLE), Alignment.V.LEFT, 16);
+//        textRenderer.draw(font, frames + " fps", 0, height - 16, Alignment.V.LEFT, 16);
+
+        textRenderer.draw(font, "Cursor pos: (" + Fe2D.input.cursorX() + ", " + Fe2D.input.cursorY() + ")",
+            0, height - 3 * 16, Alignment.V.LEFT, 16);
+        textRenderer.end();
     }
 
     @Override
-    public void close() {
-        textBatch.dispose();
+    public void dispose() {
+        super.dispose();
         Textures.dispose();
+        dispose(spriteBatch);
     }
 }

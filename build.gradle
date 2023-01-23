@@ -3,53 +3,76 @@ plugins {
     id 'idea'
 }
 
-sourceCompatibility = targetCompatibility = JavaVersion.VERSION_17
-
 group 'org.funnydevelopers'
-archivesBaseName = 'mvzje'
 version '0.1.0-SNAPSHOT'
 
 repositories {
     mavenCentral()
     // temporary maven repository
+    maven { url 'https://oss.sonatype.org/content/repositories/snapshots' }
     maven { url 'https://s01.oss.sonatype.org/content/repositories/releases' }
     maven { url 'https://s01.oss.sonatype.org/content/repositories/snapshots' }
 }
 
 dependencies {
-    implementation 'io.github.over-run:swgl-core:0.2.0-SNAPSHOT'
-    implementation 'org.slf4j:slf4j-simple:2.0.3'
-    compileOnly 'org.jetbrains:annotations:23.0.0'
-    runtimeOnly 'org.lwjgl:lwjgl::natives-windows'
-    runtimeOnly 'org.lwjgl:lwjgl-glfw::natives-windows'
-    runtimeOnly 'org.lwjgl:lwjgl-jemalloc::natives-windows'
-    runtimeOnly 'org.lwjgl:lwjgl-opengl::natives-windows'
-    runtimeOnly 'org.lwjgl:lwjgl-stb::natives-windows'
+    implementation 'io.github.xenfork:fe2d:0.1.0-SNAPSHOT'
+    for (String depend in ['', '-glfw', '-opengl', '-stb', '-jemalloc']) {
+        runtimeOnly "org.lwjgl:lwjgl$depend::natives-windows"
+    }
+
+    implementation 'org.slf4j:slf4j-simple:2.0.6'
+    compileOnly 'org.jetbrains:annotations:23.1.0'
 }
 
-tasks.withType(JavaCompile) {
+def targetJavaVersion = 17
+tasks.withType(JavaCompile).configureEach {
     options.encoding 'UTF-8'
+    if (targetJavaVersion >= 10 || JavaVersion.current().isJava10Compatible()) {
+        options.release.set(targetJavaVersion)
+    }
+}
+
+java {
+    def javaVersion = JavaVersion.toVersion(targetJavaVersion)
+    if (JavaVersion.current() < javaVersion) {
+        toolchain.languageVersion.set(JavaLanguageVersion.of(targetJavaVersion))
+    }
+    archivesBaseName = 'mvzje'
+    withJavadocJar()
+    withSourcesJar()
 }
 
 jar {
     from 'LICENSE'
     manifest {
         attributes 'Main-Class': 'org.funnydevelopers.mvzje.client.main.Main',
-                'Specification-Title': archiveBaseName,
-                'Specification-Vendor': 'Funny Developers',
-                'Specification-Version': '0',
-                'Implementation-Title': 'MvZ JE',
-                'Implementation-Vendor': 'Funny Developers',
-                'Implementation-Version': archiveVersion
+            'Specification-Title': archiveBaseName,
+            'Specification-Vendor': 'Funny Developers',
+            'Specification-Version': '0',
+            'Implementation-Title': 'MvZ JE',
+            'Implementation-Vendor': 'Funny Developers',
+            'Implementation-Version': archiveVersion
     }
 }
 
-task sourcesJar(type: Jar, dependsOn: classes) {
+javadoc {
+    failOnError = false
+    options.encoding 'UTF-8'
+    options.charSet 'UTF-8'
+    options.author true
+    options.locale 'en_US'
+    options.links "https://docs.oracle.com/en/java/javase/$sourceCompatibility/docs/api/"
+    options.windowTitle "MvZ JE ${project.version} Javadoc"
+}
+
+sourcesJar {
+    dependsOn classes
     archiveClassifier.set 'sources'
     from sourceSets.main.allSource, 'LICENSE'
 }
 
-task javadocJar(type: Jar, dependsOn: javadoc) {
+javadocJar {
+    dependsOn javadoc
     archiveClassifier.set 'javadoc'
     from javadoc, 'LICENSE'
 }
